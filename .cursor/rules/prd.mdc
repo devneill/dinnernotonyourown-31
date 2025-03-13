@@ -169,10 +169,13 @@ And remove any `json({})` wrappers
 			- Use `useFetcher()` for smaller UI updates
 		- Split the UI into components within the same route file. 
 	- Frontend layout:
-		- Dinner Plans Section
+		- Header that says:
+			- If not attending any restaurant: "You're having dinner on your own 😭"
+			- If attending a restaurant: "🎉 You've got dinner plans! 🎉"
+		- Dinner Plans Section (don't show a header for this section)
 			- shows all restaurantsWithAttendance
-			- an empty state with a dashed border that says 'Everyone is having dinner on their own 🥲'
-				- it should be the same height as a RestaurantCard to avoid layout shift when a card is added
+			- an empty state with a dashed border that says 'Everyone is having dinner on their own 🤷'
+				- it should be the same height as 2 RestaurantCards to avoid layout shift when a card is added
 		- Restaurant List Section
 			- Has a `Filters`  component at the top 
 				- all filters can only have one active toggle at a time
@@ -214,5 +217,9 @@ And remove any `json({})` wrappers
 
 # Phase 6 - Polish 
 
-1. `npm install motion` 
-2. Add layout animation to the restaurant cards so they move smoothly between the main list and the dinner plans list
+1. Add animation
+	1. `npm install motion`
+	2.  use `motion` and `AnimatePresence` from "motion/react" to add layout animation to the restaurant cards. They should:
+		- smoothly fade in and out when filters are changed or when moving between the main list and the dinner plans list
+		- smoothly reposition when moving within the grid
+2. Style the UI like www.epicweb.dev, with some color!
