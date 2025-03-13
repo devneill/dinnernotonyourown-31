@@ -212,10 +212,7 @@ And remove any `json({})` wrappers
 	- Set up the root domain and the @www. subdomain
 	- Use `fly certs` instead of `fly domains` (it is deprecated)
 
-# Phase 6 - Tests & Mocks
+# Phase 6 - Polish 
 
-1. Add a mock for the Google API
-2.  Add an e2e test for
-	- Filters
-	- Joining a restaurant
-	- Leaving a restaurant
+1. `npm install motion` 
+2. Add layout animation to the restaurant cards so they move smoothly between the main list and the dinner plans list
