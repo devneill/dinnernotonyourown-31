@@ -126,41 +126,64 @@ export async function getAllRestaurantDetails({
   radius: number
   userId?: User['id']
 }) {
+  console.log('🔎 getAllRestaurantDetails called with:', { lat, lng, radius, userId })
+  
   // Fetch restaurants from Google Places API with caching
+  const cacheKey = `restaurants:${lat}:${lng}:${radius}`
+  console.log('🔎 Checking cache for key:', cacheKey)
+  
   const restaurants = await cachified({
-    key: `restaurants:${lat}:${lng}:${radius}`,
+    key: cacheKey,
     cache: lruCache,
     ttl: 1000 * 60 * 60, // 1 hour
     staleWhileRevalidate: 1000 * 60 * 5, // 5 minutes
     async getFreshValue() {
+      console.log('🔎 Cache miss for Google Places API, fetching fresh data')
       const restaurants = await getNearbyRestaurants({ lat, lng, radius })
+      console.log('🔎 Got', restaurants.length, 'restaurants from Google Places API')
       await upsertRestaurants(restaurants)
       return restaurants
     },
   })
+  console.log('🔎 Got', restaurants.length, 'restaurants from cache/API')
   
   // Get restaurants from database (should be cached by the above operation)
+  console.log('🔎 Checking database cache')
   const dbRestaurants = await cachified({
     key: 'restaurants:db',
     cache,
     ttl: 1000 * 60 * 60, // 1 hour
     staleWhileRevalidate: 1000 * 60 * 5, // 5 minutes
-    getFreshValue: getRestaurantsFromDb,
+    getFreshValue: () => {
+      console.log('🔎 Cache miss for database, fetching fresh data')
+      return getRestaurantsFromDb()
+    },
   })
+  console.log('🔎 Got', dbRestaurants.length, 'restaurants from database cache')
   
   // Get real-time attendance data (not cached)
+  console.log('🔎 Getting attendance data')
   const attendeeCounts = await getAttendeeCountByRestaurant()
+  console.log('🔎 Got attendance data for', Object.keys(attendeeCounts).length, 'restaurants')
+  
   const userAttendingRestaurantId = userId 
     ? await getUserAttendingRestaurant(userId)
     : null
+  console.log('🔎 User is attending restaurant:', userAttendingRestaurantId)
   
   // Combine all data
+  console.log('🔎 Combining data for', dbRestaurants.length, 'restaurants')
   const restaurantsWithDetails: RestaurantWithDetails[] = dbRestaurants.map(restaurant => ({
     ...restaurant,
     attendeeCount: attendeeCounts[restaurant.id] || 0,
     isUserAttending: restaurant.id === userAttendingRestaurantId,
     distance: calculateDistance(lat, lng, restaurant.lat, restaurant.lng),
   }))
+  
+  console.log('🔎 Returning', restaurantsWithDetails.length, 'restaurants with details')
+  if (restaurantsWithDetails.length > 0) {
+    console.log('🔎 First restaurant:', JSON.stringify(restaurantsWithDetails[0]))
+  }
   
   return restaurantsWithDetails
 }
@@ -177,6 +200,15 @@ export async function joinDinnerGroup({
 }) {
   // First, leave any existing dinner group
   await leaveDinnerGroup({ userId })
+  
+  // Check if the restaurant exists
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id: restaurantId },
+  })
+  
+  if (!restaurant) {
+    throw new Error(`Restaurant with ID ${restaurantId} not found`)
+  }
   
   // Find or create a dinner group for this restaurant
   const dinnerGroup = await prisma.dinnerGroup.upsert({

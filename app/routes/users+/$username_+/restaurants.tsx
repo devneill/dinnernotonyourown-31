@@ -1,17 +1,17 @@
-import { type User } from '@prisma/client'
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, type ActionFunctionArgs, useLoaderData, useSearchParams, Link, useFetcher } from 'react-router'
-import { z } from 'zod'
+import { type User } from '@prisma/client'
 import { MapPin, Star, Map } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
+import { type LoaderFunctionArgs, type ActionFunctionArgs, useLoaderData, useSearchParams, Link, useFetcher } from 'react-router'
+import { z } from 'zod'
+import { Button } from '#app/components/ui/button.tsx'
+import { Card, CardContent, CardFooter } from '#app/components/ui/card.tsx'
+import { StatusButton } from '#app/components/ui/status-button.tsx'
+import { Toggle } from '#app/components/ui/toggle.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { cn } from '#app/utils/misc.tsx'
 import { getAllRestaurantDetails, joinDinnerGroup, leaveDinnerGroup, type RestaurantWithDetails } from '#app/utils/restaurants.server.ts'
-import { Button } from '#app/components/ui/button.tsx'
-import { Card, CardContent, CardFooter } from '#app/components/ui/card.tsx'
-import { Toggle } from '#app/components/ui/toggle.tsx'
-import { StatusButton } from '#app/components/ui/status-button.tsx'
 
 // Hilton coordinates in Salt Lake City
 const HILTON_COORDINATES = {
@@ -232,9 +232,14 @@ export default function RestaurantsRoute() {
           onFilterChange={updateFilter}
         />
         
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 restaurants-grid grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {data.restaurantsNearby.length === 0 && (
+            <div className="col-span-3 text-center py-10">
+              <p className="text-muted-foreground">No restaurants found matching your filters.</p>
+            </div>
+          )}
           <AnimatePresence mode="popLayout">
-            {data.restaurantsNearby.map(restaurant => (
+            {data.restaurantsNearby.map((restaurant) => (
               <motion.div
                 key={restaurant.id}
                 layout
@@ -263,7 +268,7 @@ function DinnerPlansSection({ restaurants }: { restaurants: RestaurantWithDetail
       whileHover={{ boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)" }}
     >
       {restaurants.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="dinner-plans-grid grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence mode="popLayout">
             {restaurants.map(restaurant => (
               <motion.div

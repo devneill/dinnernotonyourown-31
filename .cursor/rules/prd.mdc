@@ -170,8 +170,8 @@ And remove any `json({})` wrappers
 		- Split the UI into components within the same route file. 
 	- Frontend layout:
 		- Header that says:
-			- If not attending any restaurant: "You're having dinner on your own 😭"
-			- If attending a restaurant: "🎉 You've got dinner plans! 🎉"
+			- If not attending any restaurant: "You're having dinner on your own 🧘‍♂️"
+			- If attending a restaurant: "You've got dinner plans! 🎉"
 		- Dinner Plans Section (don't show a header for this section)
 			- shows all restaurantsWithAttendance
 			- an empty state with a dashed border that says 'Everyone is having dinner on their own 🤷'
@@ -215,7 +215,24 @@ And remove any `json({})` wrappers
 	- Set up the root domain and the @www. subdomain
 	- Use `fly certs` instead of `fly domains` (it is deprecated)
 
-# Phase 6 - Polish 
+
+# Phase 6 - Tests & Mocks
+Rules:
+	- do not edit production code to make tests work - only modify test code
+	- tests use an in-memory SQLite db as seen in '#tests/playwright-utils.ts'
+	- use `test` and `expect` from '#tests/playwright-utils.ts'
+	- use the `login()` helper for auth
+	- look at the other test files and use the same style selectors
+1. Add fixtures for the mocks in `tests/fixtures/restaurants.ts`
+	- be aware of the cache
+1. Add mocks for the Google API
+2. Add a restaurants.test.ts suite to test:
+	1. Restaurant filtering
+	2. Join/leave restaurants
+	3. Real-time attendance
+
+
+# Phase 7 - Polish 
 
 1. Add animation
 	1. `npm install motion`
